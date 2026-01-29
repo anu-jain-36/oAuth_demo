@@ -4,33 +4,36 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../models/User.js';
 import { encrypt } from './encryption.js';
+import hashEmail from './hashEmail.js';
 
 // Debug: Check if env vars are loaded
 console.log('Google Client ID loaded:', process.env.GOOGLE_CLIENT_ID ? 'YES' : 'NO');
 console.log('Google Client Secret loaded:', process.env.GOOGLE_CLIENT_SECRET ? 'YES' : 'NO');
 
-passport.use(new LocalStrategy(
-  { usernameField: 'email' },
-  async (email, password, done) => {
-    try {
-      const encryptedEmail = encrypt(email);
-      const user = await User.findOne({ email: encryptedEmail });
-      
-      if (!user) {
-        return done(null, false, { message: 'Invalid email or password' });
+passport.use(
+  new LocalStrategy(
+    { usernameField: 'email' },
+    async (email, password, done) => {
+      try {
+        const emailHash = hashEmail(email);
+
+        const user = await User.findOne({ email: emailHash });
+        if (!user) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+
+        const isValid = await user.comparePassword(password);
+        if (!isValid) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+
+        return done(null, user);
+      } catch (err) {
+        return done(err);
       }
-      
-      const isValid = await user.comparePassword(password);
-      if (!isValid) {
-        return done(null, false, { message: 'Invalid email or password' });
-      }
-      
-      return done(null, user);
-    } catch (error) {
-      return done(error);
     }
-  }
-));
+  )
+);
 
 // Google OAuth - only enable if you have credentials
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {

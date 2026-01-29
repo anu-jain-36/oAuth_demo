@@ -1,6 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 import User from '../models/User.js';
+import hashEmail from '../config/hashEmail.js';
 import { encrypt } from '../config/encryption.js';
 import { isAuthenticated } from '../middleware/auth.js';
 
@@ -14,15 +15,15 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Email and password required' });
     }
 
-    const encryptedEmail = encrypt(email);
-    const existingUser = await User.findOne({ email: encryptedEmail });
+    const emailHash = hashEmail(email);
 
+    const existingUser = await User.findOne({ email: emailHash });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
     const user = await User.create({
-      email: encryptedEmail,
+      email: emailHash,
       password,
       name
     });
@@ -31,19 +32,23 @@ router.post('/signup', async (req, res) => {
       if (err) {
         return res.status(500).json({ message: 'Error logging in' });
       }
-      res.json({
+
+      res.status(201).json({
         message: 'Signup successful',
         user: {
           id: user._id,
-          email: user.email,
+          email: user.email, // ⚠️ this is a hash now
           name: user.name
         }
       });
     });
+
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
