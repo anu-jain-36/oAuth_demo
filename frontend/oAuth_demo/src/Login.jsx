@@ -12,7 +12,7 @@ export default function Login({ onToggle, onLoginSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/auth/login', {
+      const response = await fetch('http://localhost:5001/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -34,12 +34,12 @@ export default function Login({ onToggle, onLoginSuccess }) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:5000/auth/google';
+    window.location.href = 'http://localhost:5001/auth/google';
   };
 
   return (
     <div className="auth-card">
-      <h1>Welcome Back</h1>
+      <h1>Demo Website</h1>
       <p className="subtitle">Login to your account</p>
 
       {error && <div className="error">{error}</div>}

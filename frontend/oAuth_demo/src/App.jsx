@@ -14,7 +14,7 @@ export default function App() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('http://localhost:5000/auth/user', {
+      const response = await fetch('http://localhost:5001/auth/user', {
         credentials: 'include'
       });
 

@@ -13,7 +13,7 @@ export default function Signup({ onToggle, onSignupSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/auth/signup', {
+      const response = await fetch('http://localhost:5001/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -35,7 +35,7 @@ export default function Signup({ onToggle, onSignupSuccess }) {
   };
 
   const handleGoogleSignup = () => {
-    window.location.href = 'http://localhost:5000/auth/google';
+    window.location.href = 'http://localhost:5001/auth/google';
   };
 
   return (
